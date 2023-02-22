@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import * as SecureStorage from "expo-secure-store"
 
 const BaseUrl = "https://api.themoviedb.org/3/";
 const APIKey = "b4d43d32d14924e767355712d31b5898";
@@ -10,15 +11,42 @@ export const getAuthToken = async () => {
     return await fetch(
       `${BaseUrl}/authentication/guest_session/new?api_key=${APIKey}`
     ).then((response) =>
-      response.json().then((token) => {
-        console.log(token);
-        return token;
+      response.json().then(async(token) => {
+        console.log(token.guest_session_id);
+        await SaveToken(token.guest_session_id)
       })
     );
   } catch {
     return [];
   }
 };
+
+async function SaveToken(token) {
+ await SecureStorage.setItemAsync("Session", token)
+}
+export function GetSession(){
+  return SecureStorage.getItemAsync("SessionId").then(token=>token)
+}
+
+export async function RateMovie(rate, MovieId, MovieName) {
+ GetSession().then(async(token)=>{
+  try {
+    return await fetch(
+      `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&guest_session_id=${token}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify({ value: rate }),
+      }
+    ).then((response) =>
+      response.json().then((status) => Alert.alert(`Pelicula ${MovieName} calificada: ${rate}`))
+    );
+  } catch {
+    (err)=>console.log(err);
+  }})
+}
 
 export const FetchCast = async (movieId) => {
   try {
@@ -33,27 +61,6 @@ export const FetchCast = async (movieId) => {
 const organize = (list) => {
   return list.cast.filter((importance) => importance.order < 9);
 };
-
-export async function RateMovie(rate, sessionId, MovieId) {
-  try {
-    return await fetch(
-      `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&guest_session_id=${sessionId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify({ value: rate }),
-      }
-    ).then((response) =>
-      response.json().then((status) => Alert.alert(status.status_message))
-    );
-  } catch {
-    return[];
-  }
-}
-
-export async function SaveToken() {}
 
 export async function FetchMoviesData() {
   try {

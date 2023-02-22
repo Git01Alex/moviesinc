@@ -12,12 +12,11 @@ import { imageBaseUrl } from "../API/TheMovieDB";
 import Rating from "./rating";
 
 const Movieinfo = (props) => {
-  const [rate, setRate] = useState(0);
   const getGenres = () => {
     try {
       return `${props.Movie.MovieGenre.map(
         (value) =>
-          props.Movie.GenresList.genres.filter((val) => val.id === value)[0]
+          props.Movie.GenresList.genres.filter((genre) => genre.id === value)[0]
             .name
       )} `;
     } catch {
@@ -80,7 +79,7 @@ const Movieinfo = (props) => {
                     <Text style={styles.primaryTextColor}>
                       Calificar pelicula
                     </Text>
-                    <Rating InitialRate={0} />
+                    <Rating InitialRate={0} MovieId={props.Movie.MovieId} MovieName={props.Movie.Title}/>
                   </View>
                 </View>
               </View>
