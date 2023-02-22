@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import {
   ScrollView,
@@ -8,15 +7,20 @@ import {
   Image,
   ImageBackground,
 } from "react-native";
-import { FetchMoviesGenres, FetchMoviesData } from "../BackEnd/TheMovieDB";
 import Cards from "./cards";
+import { FetchMoviesData, FetchMoviesGenres} from "../API/TheMovieDB";
+
 
 const HomeScreen = () => {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   useEffect(() => {
+    let ignore= false;
+    if(!ignore){
     FetchMoviesGenres().then((genres) => setGenres(genres));
-    FetchMoviesData().then((movies) => setMovies(movies));
+    FetchMoviesData().then((movies) => setMovies(movies));}
+    return()=>ignore=true;
+    
   }, []);
 
   return (
@@ -78,7 +82,7 @@ const HomeScreen = () => {
                     {movies.map((value) => (
                       <Cards
                         GenresList={genres}
-                        key={value.name}
+                        key={value.id}
                         MovieGenre={value.genre_ids}
                         MovieId={value.id}
                         Title={value.title}
