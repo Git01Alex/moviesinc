@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TouchableOpacity,
   Modal,
@@ -7,26 +7,31 @@ import {
   Text,
   ScrollView,
   Image,
+  Dimensions,
 } from "react-native";
-import { imageBaseUrl } from "../API/TheMovieDB";
+import { imageBaseUrl, getGenres } from "../API/TheMovieDB";
 import Rating from "./rating";
 
 const Movieinfo = (props) => {
-  const getGenres = () => {
-    try {
-      return `${props.Movie.MovieGenre.map(
-        (value) =>
-          props.Movie.GenresList.genres.filter((genre) => genre.id === value)[0]
-            .name
-      )} `;
-    } catch {
-      return [];
-    }
-  };
+  const [screenSize, setScreenSize] = useState(Dimensions.get("screen"));
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ screen }) => {
+      setScreenSize({ screen});
+    });
+    return () => subscription?.remove();
+  },[screenSize]);
+
   return (
     <Modal animationType="slide" transparent={true} visible={props.Visible}>
       <View style={styles.modalDarkness}>
-        <View style={styles.container}>
+        <View
+          style={{
+            backgroundColor: "black",
+            width: screenSize.width < 700 ? "100%" : "60%",
+            height: "80%",
+            borderRadius: 15,
+          }}
+        >
           <View style={{ flex: 10 }}>
             <TouchableOpacity
               onPress={() => props.HandleVisible(false)}
@@ -57,7 +62,7 @@ const Movieinfo = (props) => {
                   <Text style={styles.infoContainerRelaeaseDateModal}>
                     {new Date(props.Movie.ReleaseDate).getFullYear()}
                   </Text>
-                  <Text style={styles.overview}>{getGenres()}</Text>
+                  <Text style={styles.overview}>{getGenres(props.Movie)}</Text>
                   <Text style={styles.infoContainerAcceptanceModal}>
                     Calificacion: {props.Movie.Acceptance}
                   </Text>
@@ -79,7 +84,11 @@ const Movieinfo = (props) => {
                     <Text style={styles.primaryTextColor}>
                       Calificar pelicula
                     </Text>
-                    <Rating InitialRate={0} MovieId={props.Movie.MovieId} MovieName={props.Movie.Title}/>
+                    <Rating
+                      InitialRate={0}
+                      MovieId={props.Movie.MovieId}
+                      MovieName={props.Movie.Title}
+                    />
                   </View>
                 </View>
               </View>
@@ -92,12 +101,6 @@ const Movieinfo = (props) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "black",
-    width: "100%",
-    height: "80%",
-    borderRadius: 15,
-  },
   modalDarkness: {
     alignItems: "center",
     justifyContent: "center",

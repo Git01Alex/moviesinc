@@ -1,65 +1,59 @@
-import { Alert } from "react-native";
-import * as SecureStorage from "expo-secure-store"
+import { Alert, Platform } from "react-native";
+import { GetSession } from "./Auth";
 
 const BaseUrl = "https://api.themoviedb.org/3/";
 const APIKey = "b4d43d32d14924e767355712d31b5898";
 const Language = "es";
 export const imageBaseUrl = "https://image.tmdb.org/t/p/original/";
 
-export const getAuthToken = async () => {
+export async function RateMovie(rate, MovieId, MovieName) {
+  GetSession().then(async (token) => {
+    try {
+      return await fetch(
+        `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&guest_session_id=${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify({ value: rate }),
+        }
+      ).then((response) =>
+        response
+          .json()
+          .then(() => Platform.OS !== "web" ? 
+            Alert.alert(`Pelicula ${MovieName} calificada: ${rate}`) :
+            alert(`Pelicula ${MovieName} calificada: ${rate}`)
+          )
+      );
+    } catch {
+      (err) => console.log(err);
+    }
+  });
+}
+export const getGenres = (Movie) => {
+  try {
+    return `${Movie.MovieGenre.map(
+      (value) =>
+        Movie.GenresList.genres.filter((genre) => genre.id === value)[0]
+          .name
+    )} `;
+  } catch {
+    return [];
+  }
+};
+export const FetchCast = async (movieId) => {
   try {
     return await fetch(
-      `${BaseUrl}/authentication/guest_session/new?api_key=${APIKey}`
-    ).then((response) =>
-      response.json().then(async(token) => {
-        console.log(token.guest_session_id);
-        await SaveToken(token.guest_session_id)
-      })
-    );
+      `${BaseUrl}movie/${movieId}/credits?api_key=${APIKey}&language=${Language}/`
+    ).then((response) => response.json().then((cast) => organizeCast(cast, 9)));
   } catch {
     return [];
   }
 };
 
-async function SaveToken(token) {
- await SecureStorage.setItemAsync("Session", token)
-}
-export function GetSession(){
-  return SecureStorage.getItemAsync("SessionId").then(token=>token)
-}
-
-export async function RateMovie(rate, MovieId, MovieName) {
- GetSession().then(async(token)=>{
-  try {
-    return await fetch(
-      `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&guest_session_id=${token}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify({ value: rate }),
-      }
-    ).then((response) =>
-      response.json().then((status) => Alert.alert(`Pelicula ${MovieName} calificada: ${rate}`))
-    );
-  } catch {
-    (err)=>console.log(err);
-  }})
-}
-
-export const FetchCast = async (movieId) => {
-  try {
-    return await fetch(
-      `${BaseUrl}movie/${movieId}/credits?api_key=${APIKey}&language=${Language}/`
-    ).then((response) => response.json().then((cast) => organize(cast)));
-  } catch {
-    return[];
-  }
-};
-
-const organize = (list) => {
-  return list.cast.filter((importance) => importance.order < 9);
+const organizeCast = (list, people) => {
+  return list.cast.filter((importance) => importance.order < people);
 };
 
 export async function FetchMoviesData() {
@@ -91,7 +85,7 @@ function organizeAlphabetically(movies) {
       }
     });
   } catch {
-   return [];
+    return [];
   }
 }
 

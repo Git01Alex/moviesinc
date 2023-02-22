@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Cards from "./cards";
 import { FetchMoviesData, FetchMoviesGenres} from "../API/TheMovieDB";
-
+import Header from "./header";
 
 const HomeScreen = () => {
   const [movies, setMovies] = useState([]);
@@ -34,15 +34,7 @@ const HomeScreen = () => {
         style={styles.header}
       >
         <View style={styles.backGroundTint}>
-          <Image
-            resizeMode="stretch"
-            style={styles.logo}
-            source={{
-              uri: "https://flaticons.net/icon.php?slug_category=mobile-application&slug_icon=video-camera",
-            }}
-          />
-          <Text style={styles.headerTitle}>Movies Inc</Text>
-
+          <Header/>
           <View style={styles.content}>
             <View style={{ Flex: 1 }}>
               <Text
@@ -123,13 +115,6 @@ const styles = StyleSheet.create({
     marginTop: "5%",
     overflow: "hidden",
   },
-  logo: {
-    width: 50,
-    height: 50,
-    border: "2px solid white",
-    padding: 10,
-    borderRadius: 30,
-  },
   header: {
     flex: 1,
     width: "100%",
@@ -137,11 +122,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 50,
-  },
-  headerTitle: {
-    fontSize: 25,
-    color: "white",
-    fontWeight: "bold",
   },
 });
 
