@@ -1,30 +1,17 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { lazy, Suspense } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
-import { FetchCast, imageBaseUrl } from "../API/TheMovieDB";
-import Movieinfo from "./movieinfo";
+import { imageBaseUrl } from "../API/TheMovieDB";
+const Movieinfo = lazy(() => import("./movieinfo"));
 
 const Cards = (props) => {
   const [moreInfo, showMoreInfo] = useState(false);
-  const [cast, setCast] = useState([]);
-
-  useEffect(() => {
-    let ignore = false;
-    if (!ignore) {
-      FetchCast(props.MovieId).then((result) => setCast(result));
-    }
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
   return (
     <TouchableOpacity
       style={styles.container}
@@ -35,28 +22,29 @@ const Cards = (props) => {
       <ImageBackground
         resizeMode="stretch"
         source={{
-          uri: `${imageBaseUrl + props.ImagePath}`,
+          uri: `${imageBaseUrl + props.Movie.backdrop_path}`,
         }}
         style={styles.background}
       >
         <View style={styles.infoContainer}>
-          <Text style={styles.infoContainerTitle}>{props.Title}</Text>
+          <Text style={styles.infoContainerTitle}>{props.Movie.title}</Text>
           <Text style={styles.infoContainerRelaeaseDate}>
-            {props.ReleaseDate}
+            {props.Movie.release_date}
           </Text>
           <Text style={styles.infoContainerAcceptance}>
-            Votos: {props.Votes}
+            Votos: {props.Movie.vote_average}
           </Text>
         </View>
       </ImageBackground>
-      {showMoreInfo && (
-        <Movieinfo
-          Movie={props}
-          Cast={cast}
-          Visible={moreInfo}
-          HandleVisible={showMoreInfo}
-        />
-      )}
+      {moreInfo ? (
+        <Suspense>
+          <Movieinfo
+            Movie={props.Movie}
+            Visible={moreInfo}
+            HandleVisible={showMoreInfo}
+          />
+        </Suspense>
+      ) : null}
     </TouchableOpacity>
   );
 };
@@ -70,11 +58,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "black",
     overflow: "hidden",
+    height: "90%",
   },
   image: { width: "100%", height: "100%", flex: 1, borderRadius: 10 },
   infoContainer: {
-    flex: 0.22,
-    padding: 10,
+    flex: 0.25,
+    padding: 20,
     backgroundColor: "rgba(0,0,0,0.7)",
   },
   infoContainerTitle: { fontSize: 13, color: "white", fontWeight: "bold" },

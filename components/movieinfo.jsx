@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   TouchableOpacity,
   Modal,
@@ -9,18 +9,40 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import { imageBaseUrl, getGenres } from "../API/TheMovieDB";
+import {
+  imageBaseUrl,
+  getGenres,
+  FetchCast,
+  GetSimilarMovies,
+  FetchMovie,
+} from "../API/TheMovieDB";
 import Rating from "./rating";
+import Cards from "./cards";
+import StarRating from "react-native-star-rating-widget";
+const HorizontalScroller = lazy(() => import("./horizontalScroller"));
 
 const Movieinfo = (props) => {
   const [screenSize, setScreenSize] = useState(Dimensions.get("screen"));
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", ({ screen }) => {
-      setScreenSize({ screen});
-    });
-    return () => subscription?.remove();
-  },[screenSize]);
+  const [movie, setMovie] = useState([]);
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [cast, setCast] = useState([]);
+  const [favorite, setFavorite] = useState(false);
 
+  useEffect(() => {
+    const screenChange = Dimensions.addEventListener("change", ({ screen }) => {
+      setScreenSize({ screen });
+    });
+    let ignore = false;
+    if (!ignore) {
+      FetchCast(props.Movie.id).then((result) => setCast(result));
+      FetchMovie(props.Movie.id).then((result) => setMovie(result));
+      GetSimilarMovies(props.Movie.id).then((value) => setSimilarMovies(value));
+    }
+    return () => {
+      screenChange?.remove();
+      ignore = true;
+    };
+  }, []);
   return (
     <Modal animationType="slide" transparent={true} visible={props.Visible}>
       <View style={styles.modalDarkness}>
@@ -34,48 +56,76 @@ const Movieinfo = (props) => {
         >
           <View style={{ flex: 10 }}>
             <TouchableOpacity
-              onPress={() => props.HandleVisible(false)}
+              onPress={() => {
+                props.HandleVisible(false);
+              }}
               style={styles.closeButton}
             >
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 30, color: "white" }}>{"x"}</Text>
               </View>
             </TouchableOpacity>
+
             <ScrollView
               showsVerticalScrollIndicator={false}
               showsHorizontalScrollIndicator={false}
             >
               <View>
-                <View>
-                  <Image
-                    style={styles.image}
-                    resizeMode="stretch"
-                    source={{
-                      uri: `${imageBaseUrl + props.Movie.ImagePath}`,
-                    }}
-                  />
-                </View>
+                {movie.backdrop_path !== undefined ? (
+                  <View>
+                    <Image
+                      style={styles.image}
+                      resizeMode="stretch"
+                      source={{
+                        uri: `${imageBaseUrl + movie.backdrop_path}`,
+                      }}
+                    />
+                  </View>
+                ) : null}
                 <View style={styles.infoContainer}>
                   <Text style={styles.infoContainerTitleModal}>
-                    {props.Movie.Title}
+                    {movie.title}{" "}
                   </Text>
+                  <TouchableOpacity
+                      onPress={() => {
+                        setFavorite(!favorite);
+                      }}
+                      style={{
+                        borderRadius: 40,
+                        backgroundColor: favorite ? "red":"black",
+                        width: 50,
+                        height: 50,
+                        margin:10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        position: "absolute",
+                        zIndex: 2,
+                        alignSelf:"flex-end"
+                      }}
+                    >
+                      <Image 
+                      source={{uri:"https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/hearts-icon-18-256.png"}}
+                      resizeMode="stretch"
+                      style={{width:30, height:30}}
+                      />
+                    </TouchableOpacity>
                   <Text style={styles.infoContainerRelaeaseDateModal}>
-                    {new Date(props.Movie.ReleaseDate).getFullYear()}
+                    {movie.release_date!== undefined ? new Date(movie.release_date).getFullYear():null}
                   </Text>
-                  <Text style={styles.overview}>{getGenres(props.Movie)}</Text>
+                  <Text style={styles.overview}>{getGenres(movie)}</Text>
                   <Text style={styles.infoContainerAcceptanceModal}>
-                    Calificacion: {props.Movie.Acceptance}
+                    Calificacion: {movie.popularity}
                   </Text>
                   <Text></Text>
                   <Text style={styles.title}>
                     Reseña:{" "}
-                    <Text style={styles.overview}> {props.Movie.Overview}</Text>
+                    <Text style={styles.overview}> {movie.overview}</Text>
                   </Text>
                   <Text style={styles.title}>
                     Reparto:{" "}
                     <Text style={styles.overview}>
                       {" "}
-                      {props.Cast.map(
+                      {cast.map(
                         (value) => `${value.name}:  ${value.character}, `
                       )}
                     </Text>
@@ -86,9 +136,21 @@ const Movieinfo = (props) => {
                     </Text>
                     <Rating
                       InitialRate={0}
-                      MovieId={props.Movie.MovieId}
-                      MovieName={props.Movie.Title}
+                      MovieId={movie.id}
+                      MovieName={movie.title}
                     />
+                  </View>
+                  <View style={{ color: "white", height: "100%" }}>
+                    <Text style={styles.title}>Peliculas similares</Text>
+                    <Suspense>
+                      <HorizontalScroller
+                        content={similarMovies.map((movie) =>
+                          movie.backdrop_path !== null ? (
+                            <Cards key={movie.id} Movie={movie} />
+                          ) : null
+                        )}
+                      />
+                    </Suspense>
                   </View>
                 </View>
               </View>
@@ -117,6 +179,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     zIndex: 2,
+  },
+  favoriteButton: {
+    borderRadius: 40,
+    backgroundColor: "red",
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    zIndex: 2,
+    alignSelf:"flex-end"
   },
   infoContainer: {
     flex: 0.6,

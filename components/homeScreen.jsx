@@ -10,6 +10,7 @@ import {
 import Cards from "./cards";
 import { FetchMoviesData, FetchMoviesGenres} from "../API/TheMovieDB";
 import Header from "./header";
+import HorizontalScroller from "./horizontalScroller";
 
 const HomeScreen = () => {
   const [movies, setMovies] = useState([]);
@@ -48,48 +49,10 @@ const HomeScreen = () => {
                 En cartelera
               </Text>
             </View>
-            <View
-              style={{
-                alignItems: "center",
-                backgroundColor: "rgba(195,195,195, 0.2)",
-                padding: 0,
-                height: "50%",
-              }}
-            >
-             
-              <View style={{ flex: 1, alignItems: "stretch" }}>
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  showsHorizontalScrollIndicator={false}
-                  horizontal={true}
-                >
-                  <View
-                    style={{
-                      overflow: "hidden",
-                      flexWrap: "wrap",
-                      flexDirection: "row",
-                      justifyContent: "space-evenly",
-                    }}
-                  >
-                    {movies.map((value) => (
-                      <Cards
-                        GenresList={genres}
-                        key={value.id}
-                        MovieGenre={value.genre_ids}
-                        MovieId={value.id}
-                        Title={value.title}
-                        ImagePath={value.backdrop_path}
-                        ReleaseDate={value.release_date}
-                        Acceptance={value.vote_average}
-                        Overview={value.overview}
-                        Votes={value.vote_average}
-                      />
-                    ))}
-                  </View>
-                </ScrollView>
-              </View>
+             <HorizontalScroller 
+             content={movies.map((movie)=> movie.backdrop_path !==null? <Cards key={movie.id} Movie={movie}/>:null)}
+             />
             </View>
-          </View>
         </View>
       </ImageBackground>
     </View>
