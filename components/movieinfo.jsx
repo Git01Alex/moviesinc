@@ -9,12 +9,14 @@ import {
   Image,
   Dimensions,
 } from "react-native";
+import * as SecureStorage from "expo-secure-store";
 import {
   imageBaseUrl,
   getGenres,
   FetchCast,
   GetSimilarMovies,
   FetchMovie,
+  setFavoriteMovie,
 } from "../API/TheMovieDB";
 import Rating from "./rating";
 import Cards from "./cards";
@@ -87,8 +89,9 @@ const Movieinfo = (props) => {
                     {movie.title}{" "}
                   </Text>
                   <TouchableOpacity
-                      onPress={() => {
+                      onPress={async() => {
                         setFavorite(!favorite);
+                        await setFavoriteMovie(movie, !favorite)
                       }}
                       style={{
                         borderRadius: 40,

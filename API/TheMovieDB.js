@@ -1,6 +1,5 @@
 import { Alert, Platform } from "react-native";
-import { CheckCredentials, GetSavedKey, SaveToStore } from "./Auth";
-
+import {  GetSavedKey, SaveToStore } from "./Auth";
 export const BaseUrl = "https://api.themoviedb.org/3/";
 export const APIKey = "b4d43d32d14924e767355712d31b5898";
 export const Language = "es-Es";
@@ -16,11 +15,35 @@ export const FetchMoviesGenres = async () => {
   }
 };
 
-export async function RateMovie(rate, MovieId, MovieName) {
-  CheckCredentials("SessionId").then(async (token) => {
+export async function Sessionrequest() {
+  GetSavedKey("TemporalAccessToken").then(async (token) => {
     try {
       return await fetch(
-        `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&guest_session_id=${token}`,
+        `${BaseUrl}authentication/session/new?api_key=${APIKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=utf-8",
+          },
+          body: JSON.stringify({ request_token: token }),
+        }
+      ).then((response) =>
+        response.json().then(async (sessionId) => {
+          SaveToStore("MySessionId", sessionId.session_id);
+          return true;
+        })
+      );
+    } catch {
+      (err) => console.log(err);
+    }
+  });
+}
+
+export async function RateMovie(rate, MovieId, MovieName) {
+  GetSavedKey("MySessionId").then(async (session) => {
+    try {
+      return await fetch(
+        `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&session_id=${session.id}`,
         {
           method: "POST",
           headers: {
@@ -43,28 +66,36 @@ export async function RateMovie(rate, MovieId, MovieName) {
   });
 }
 
-export async function CreateFavoriteList() {
-  GetSavedKey("SessionId").then(async (token) => {console.log(token);
+export async function setFavoriteMovie(movie, favorite) {
+  GetSavedKey("MySessionId").then(async (sessionID) => {
     try {
       return await fetch(
-        `${BaseUrl}list?api_key=${APIKey}&guest_session_id=${token}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json;charset=utf-8",
-          },
-          body: JSON.stringify({
-            name: "favorites",
-            description:
-              "This is the list where you store your favorite movies",
-            language: Language,
-          }),
-        }
-      ).then((response) =>
-        response.json().then((list) => {console.log(list);SaveToStore("favoriteList",list.list_id)})
+        `${BaseUrl}account?api_key=${APIKey}&session_id=${sessionID}`
+      ).then((accountDetails) =>
+        accountDetails.json().then(async (account) => {
+          return await fetch(
+            `${BaseUrl}account/${account.id}/favorite?api_key=${APIKey}&session_id=${sessionID}&language=${Language}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json;charset=utf-8",
+              },
+              body: JSON.stringify({
+                media_type: "movie",
+                media_id: movie.id,
+                favorite: favorite,
+              }),
+            }
+          ).then((response) =>
+            response.json().then((action) =>
+            Platform.OS !== "web"
+              ? Alert.alert("Hecho",`Pelicula ${movie.title} ${(action.status_code===1|action.status_code===12)? "añadida a":"removida de"} favoritos`)
+              : alert(`Pelicula ${MovieName} calificada: ${rate}`))
+          );
+        })
       );
     } catch {
-      (err) => console.log(err);
+       console.log("error marking movie as favorite");
     }
   });
 }

@@ -1,16 +1,15 @@
 import * as SecureStorage from "expo-secure-store";
 import { Platform } from "react-native";
-import { CreateFavoriteList, BaseUrl, APIKey } from "./TheMovieDB";
+import { BaseUrl, APIKey } from "./TheMovieDB";
 
-export const setCredentials = async () => {
+export const getCredentials = async () => {
   try {
-     await fetch(
-      `${BaseUrl}/authentication/guest_session/new?api_key=${APIKey}`
-    ).then((response) =>
-      response.json().then(token => {
-        SaveToStore("SessionId", token.guest_session_id)
-        CreateFavoriteList()
-        return token.guest_session_id}))
+   return await fetch(`${BaseUrl}/authentication/token/new?api_key=${APIKey}`).then(
+      (response) =>
+        response.json().then(async (token) => { console.log(token.request_token);
+        return  await SaveToStore("TemporalAccessToken", token.request_token).then(()=>false)
+        })
+    );
   } catch {
     console.log("Error setting credentials");
   }
@@ -26,12 +25,10 @@ export async function GetSavedKey(key) {
     ? await SecureStorage.getItemAsync(key).then((token) => token)
     : localStorage.getItem(key);
 }
-export async function CheckCredentials(key) {
+export async function CheckCredentials() {
   try {
-    return await GetSavedKey(key).then((token) => {
-      return (token === undefined) | (token === null)
-        ? setCredentials()
-        : token;
+    return await GetSavedKey("MySessionId").then((token) => { 
+      return (token === undefined) | (token === null) ? getCredentials().then(isUserRegister=>isUserRegister) : true;
     });
   } catch {
     (err) => console.log(err);
