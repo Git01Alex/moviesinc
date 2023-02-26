@@ -8,20 +8,23 @@ import {
   ImageBackground,
 } from "react-native";
 import Cards from "./cards";
-import { FetchMoviesData, FetchMoviesGenres} from "../API/TheMovieDB";
+import { FetchMoviesData, FetchFavoriteMoviesData } from "../API/TheMovieDB";
 import Header from "./header";
 import HorizontalScroller from "./horizontalScroller";
 
 const HomeScreen = () => {
   const [movies, setMovies] = useState([]);
-  const [genres, setGenres] = useState([]);
+  const [favorites, setfavorites] = useState([]);
+
   useEffect(() => {
-    let ignore= false;
-    if(!ignore){
-    FetchMoviesGenres().then((genres) => setGenres(genres));
-    FetchMoviesData().then((movies) => setMovies(movies));}
-    return()=>ignore=true;
-    
+    let ignore = false;
+    if (!ignore) {
+      FetchMoviesData().then((movies) => setMovies(movies));
+      FetchFavoriteMoviesData().then((favoriteMovies) => {
+        setfavorites(favoriteMovies);
+      });
+    }
+    return () => (ignore = true);
   }, []);
 
   return (
@@ -35,24 +38,42 @@ const HomeScreen = () => {
         style={styles.header}
       >
         <View style={styles.backGroundTint}>
-          <Header/>
+          <Header />
           <View style={styles.content}>
             <View style={{ Flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 20,
-                  paddingTop: 0,
-                  fontWeight: "bold",
-                  color: "white",
-                }}
-              >
-                En cartelera
-              </Text>
+              <Text style={styles.subTitles}>En cartelera</Text>
             </View>
-             <HorizontalScroller 
-             content={movies.map((movie)=> movie.backdrop_path !==null? <Cards key={movie.id} Movie={movie}/>:null)}
-             />
+            <HorizontalScroller
+              content={
+                movies !== undefined ? (
+                  movies.map((movie) =>
+                    movie.backdrop_path !== null ? (
+                      <Cards key={movie.id} Movie={movie} />
+                    ) : null
+                  )
+                ) : (
+                  <Text style={styles.subTitles}>Cargando</Text>
+                )
+              }
+            />
+
+            <View style={{ Flex: 1 }}>
+              <Text style={styles.subTitles}>favoritos</Text>
             </View>
+            <HorizontalScroller
+              content={
+                favorites !== undefined ? (
+                  favorites.map((movie) =>
+                    movie.backdrop_path !== null ? (
+                      <Cards key={movie.id} Movie={movie} />
+                    ) : null
+                  )
+                ) : (
+                  <Text style={styles.subTitles}>Cargando</Text>
+                )
+              }
+            />
+          </View>
         </View>
       </ImageBackground>
     </View>
@@ -85,6 +106,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 50,
+  },
+  subTitles: {
+    fontSize: 20,
+    paddingTop: 0,
+    fontWeight: "bold",
+    color: "white",
   },
 });
 

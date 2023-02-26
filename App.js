@@ -25,7 +25,6 @@ export default function App() {
   ) : (
     <WebView
       onNavigationStateChange={(navigationDetails) => {
-        console.log(navigationDetails);
         navigationDetails.url.includes("/allow")
           ? Sessionrequest()
             ? setregistered(true)

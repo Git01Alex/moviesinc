@@ -34,7 +34,7 @@ export async function Sessionrequest() {
         })
       );
     } catch {
-      (err) => console.log(err);
+       console.log("error requesting session");
     }
   });
 }
@@ -133,6 +133,25 @@ export async function FetchMoviesData() {
   } catch {
     return [];
   }
+}
+
+export async function FetchFavoriteMoviesData() {
+ return GetSavedKey("MySessionId").then(async (sessionID) => {
+    try {
+      return await fetch(
+        `${BaseUrl}account?api_key=${APIKey}&session_id=${sessionID}`
+      ).then((accountDetails) =>
+        accountDetails.json().then(async (account) => {
+    return await fetch(
+      `${BaseUrl}/account/${account.id}/favorite/movies?api_key=${APIKey}&session_id=${sessionID}&language=${Language}&page=1`
+    ).then((response) =>
+      response
+        .json()
+        .then((fetchedmovies) => organizeAlphabetically(fetchedmovies)))}))}
+
+   catch {
+    return "error showing favorites"
+  }})
 }
 
 export async function FetchMovie(movieId) {
