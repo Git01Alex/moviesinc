@@ -12,7 +12,7 @@ const Movieinfo = lazy(() => import("./movieinfo"));
 
 const Cards = (props) => {
   const [moreInfo, showMoreInfo] = useState(false);
-  
+
   return (
     <TouchableOpacity
       style={styles.container}

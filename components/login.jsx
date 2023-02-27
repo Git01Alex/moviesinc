@@ -10,11 +10,10 @@ import {
 } from "react-native";
 import Header from "./header";
 import { Sessionrequest } from "../API/TheMovieDB";
+import { GetSavedKey } from "../API/Auth";
 
 const Login = (props) => {
-  useEffect(() => {
-
-  }, []);
+  useEffect(() => {}, []);
 
   const handleLogin = () => {
     Platform.OS !== "web" ? (
@@ -29,7 +28,7 @@ const Login = (props) => {
         source={{
           uri: `https://www.themoviedb.org/authenticate/${props.TemporalToken}`,
         }}
-        style={{ height: "80%", width: "100%", marginTop: 45 }}
+        style={styles.phonesWebView}
       />
     ) : (
       handlePopUpWindow()
@@ -38,11 +37,21 @@ const Login = (props) => {
 
   const handlePopUpWindow = () => {
     window.open(
-        `https://www.themoviedb.org/authenticate/${props.TemporalToken}`
-      )
-    document.onvisibilitychange= function(){
-        document.visibilityState === "visible" ? Sessionrequest(props.TemporalToken).then(()=>props.setUserRegistered(true)): console.log("came")
-    }
+      `https://www.themoviedb.org/authenticate/${props.TemporalToken}`
+    );
+    document.onvisibilitychange = function () {
+      document.visibilityState === "visible"
+        ? Sessionrequest(props.TemporalToken).then(() =>
+            GetSavedKey("MySessionId").then((session) =>
+              session !== undefined
+                ? props.setUserRegistered(true)
+                : alert(
+                    "Al parecer hubo un error al registrar sus credenciales, intente de nuevo."
+                  )
+            )
+          )
+        : null;
+    };
   };
   return (
     <View style={styles.container}>
@@ -54,20 +63,11 @@ const Login = (props) => {
         }}
         style={styles.header}
       >
-        <View
-          style={{
-            backgroundColor: "black",
-            width: "50%",
-            height: "50%",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
+        <View style={styles.content}>
           <Header />
-          <Text style={{ color: "white", fontSize: 30 }}>by</Text>
+          <Text style={styles.fonts}>by</Text>
           <Image
-            style={{ width: "70%", height: "30%" }}
+            style={styles.TheMovieDBLogo}
             resizeMode="stretch"
             source={{
               uri: "https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg",
@@ -78,17 +78,8 @@ const Login = (props) => {
               handleLogin();
             }}
           >
-            <View
-              style={{
-                borderRadius: 20,
-                backgroundColor: "#0d253f",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ padding: 20, color: "white", fontSize: 20 }}>
-                Iniciar sesion
-              </Text>
+            <View style={styles.signInButton}>
+              <Text style={styles.signInFont}>Iniciar sesion</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -105,6 +96,15 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#00073A",
   },
+  content: {
+    backgroundColor: "black",
+    width: "50%",
+    height: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  fonts: { color: "white", fontSize: 30 },
   header: {
     flex: 1,
     width: "100%",
@@ -113,6 +113,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingTop: 50,
   },
+  phonesWebView: { height: "80%", width: "100%", marginTop: 45 },
+  signInButton: {
+    borderRadius: 20,
+    backgroundColor: "#0d253f",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signInFont: { padding: 20, color: "white", fontSize: 20 },
+  TheMovieDBLogo: { width: "70%", height: "30%" },
 });
 
 export default Login;

@@ -17,7 +17,7 @@ const Header = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems:"center", justifyContent:"center" },
+  container: { flex: 1, alignItems: "center", justifyContent: "center" },
   logo: {
     width: 50,
     height: 50,

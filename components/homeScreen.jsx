@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  ImageBackground,
-} from "react-native";
+import { StyleSheet, Text, View, ImageBackground } from "react-native";
 import Cards from "./cards";
 import { FetchMoviesData, FetchFavoriteMoviesData } from "../API/TheMovieDB";
 import Header from "./header";
@@ -17,14 +10,10 @@ const HomeScreen = () => {
   const [favorites, setfavorites] = useState([]);
 
   useEffect(() => {
-    let ignore = false;
-    if (!ignore) {
-      FetchMoviesData().then((movies) => setMovies(movies));
-      FetchFavoriteMoviesData().then((favoriteMovies) => {
-        setfavorites(favoriteMovies);
-      });
-    }
-    return () => (ignore = true);
+    FetchMoviesData().then((movies) => setMovies(movies));
+    FetchFavoriteMoviesData().then((favoriteMovies) => {
+      setfavorites(favoriteMovies);
+    });
   }, []);
 
   return (

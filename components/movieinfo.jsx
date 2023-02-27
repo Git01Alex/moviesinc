@@ -112,7 +112,7 @@ const Movieinfo = (props) => {
                         uri: "https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/hearts-icon-18-256.png",
                       }}
                       resizeMode="stretch"
-                      style={{ width: 30, height: 30 }}
+                      style={styles.favoriteIcon}
                     />
                   </TouchableOpacity>
                   <Text style={styles.infoContainerRelaeaseDateModal}>
@@ -193,17 +193,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 2,
   },
-  favoriteButton: {
-    borderRadius: 40,
-    backgroundColor: "red",
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    zIndex: 2,
-    alignSelf: "flex-end",
-  },
+  favoriteIcon: { width: 30, height: 30 },
   infoContainer: {
     flex: 0.6,
     padding: 10,
