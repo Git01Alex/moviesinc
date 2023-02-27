@@ -22,7 +22,7 @@ import Cards from "./cards";
 const HorizontalScroller = lazy(() => import("./horizontalScroller"));
 
 const Movieinfo = (props) => {
-  const [screenSize, setScreenSize] = useState(Dimensions.get("screen").width);
+  const [screenSize, setScreenSize] = useState(Dimensions.get("window").width);
   const [movie, setMovie] = useState([]);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [cast, setCast] = useState([]);
@@ -30,14 +30,14 @@ const Movieinfo = (props) => {
 
   useEffect(() => {
     const screenChange = Dimensions.addEventListener("change", () => {
-      setScreenSize(Dimensions.get("screen").width);
+      setScreenSize(Dimensions.get("window").width);
     });
     let ignore = false;
     if (!ignore) {
-      FetchCast(props.Movie.id).then((result) => setCast(result));
-      FetchMovie(props.Movie.id).then((result) => setMovie(result));
-      GetSimilarMovies(props.Movie.id).then((value) => setSimilarMovies(value));
-      setFavorite(props.Favorite)
+      FetchCast(props.Movie).then((result) => setCast(result));
+      FetchMovie(props.Movie).then((result) => setMovie(result));
+      GetSimilarMovies(props.Movie).then((value) => setSimilarMovies(value));
+      setFavorite(props.Favorite);
     }
     return () => {
       screenChange?.remove();
@@ -88,31 +88,37 @@ const Movieinfo = (props) => {
                     {movie.title}{" "}
                   </Text>
                   <TouchableOpacity
-                      onPress={async() => {
-                        setFavorite(!favorite);
-                        await setFavoriteMovie(movie, !favorite).then(favorites=>props.SetFavorites(favorites))
+                    onPress={async () => {
+                      setFavorite(!favorite);
+                      await setFavoriteMovie(movie, !favorite).then(
+                        (favorites) => props.SetFavorites(favorites)
+                      );
+                    }}
+                    style={{
+                      borderRadius: 40,
+                      backgroundColor: favorite ? "red" : "black",
+                      width: 50,
+                      height: 50,
+                      margin: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                      zIndex: 2,
+                      alignSelf: "flex-end",
+                    }}
+                  >
+                    <Image
+                      source={{
+                        uri: "https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/hearts-icon-18-256.png",
                       }}
-                      style={{
-                        borderRadius: 40,
-                        backgroundColor: favorite ? "red":"black",
-                        width: 50,
-                        height: 50,
-                        margin:10,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        position: "absolute",
-                        zIndex: 2,
-                        alignSelf:"flex-end"
-                      }}
-                    >
-                      <Image 
-                      source={{uri:"https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/hearts-icon-18-256.png"}}
                       resizeMode="stretch"
-                      style={{width:30, height:30}}
-                      />
-                    </TouchableOpacity>
+                      style={{ width: 30, height: 30 }}
+                    />
+                  </TouchableOpacity>
                   <Text style={styles.infoContainerRelaeaseDateModal}>
-                    {movie.release_date!== undefined ? new Date(movie.release_date).getFullYear():null}
+                    {movie.release_date !== undefined
+                      ? new Date(movie.release_date).getFullYear()
+                      : null}
                   </Text>
                   <Text style={styles.overview}>{getGenres(movie)}</Text>
                   <Text style={styles.infoContainerAcceptanceModal}>
@@ -148,7 +154,12 @@ const Movieinfo = (props) => {
                       <HorizontalScroller
                         content={similarMovies.map((movie) =>
                           movie.backdrop_path !== null ? (
-                            <Cards  favoritesRef={ props.SetFavorites} isFavorite={false}  key={movie.id} Movie={movie} />
+                            <Cards
+                              favoritesRef={props.SetFavorites}
+                              isFavorite={false}
+                              key={movie.id}
+                              Movie={movie}
+                            />
                           ) : null
                         )}
                       />
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     zIndex: 2,
-    alignSelf:"flex-end"
+    alignSelf: "flex-end",
   },
   infoContainer: {
     flex: 0.6,

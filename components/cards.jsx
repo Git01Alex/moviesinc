@@ -12,6 +12,7 @@ const Movieinfo = lazy(() => import("./movieinfo"));
 
 const Cards = (props) => {
   const [moreInfo, showMoreInfo] = useState(false);
+  
   return (
     <TouchableOpacity
       style={styles.container}
@@ -39,7 +40,7 @@ const Cards = (props) => {
       {moreInfo ? (
         <Suspense>
           <Movieinfo
-            Movie={props.Movie}
+            Movie={props.Movie.id}
             Visible={moreInfo}
             HandleVisible={showMoreInfo}
             SetFavorites={props.favoritesRef}

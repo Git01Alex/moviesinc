@@ -1,5 +1,5 @@
 import { Alert, Platform } from "react-native";
-import {  GetSavedKey, SaveToStore } from "./Auth";
+import { GetSavedKey, SaveToStore } from "./Auth";
 export const BaseUrl = "https://api.themoviedb.org/3/";
 export const APIKey = "b4d43d32d14924e767355712d31b5898";
 export const Language = "es-Es";
@@ -34,7 +34,7 @@ export async function Sessionrequest() {
         })
       );
     } catch {
-       console.log("error requesting session");
+      console.log("error requesting session");
     }
   });
 }
@@ -43,7 +43,7 @@ export async function RateMovie(rate, MovieId, MovieName) {
   GetSavedKey("MySessionId").then(async (session) => {
     try {
       return await fetch(
-        `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&session_id=${session.id}`,
+        `${BaseUrl}movie/${MovieId}/rating?api_key=${APIKey}&session_id=${session}`,
         {
           method: "POST",
           headers: {
@@ -56,8 +56,8 @@ export async function RateMovie(rate, MovieId, MovieName) {
           .json()
           .then(() =>
             Platform.OS !== "web"
-              ? Alert.alert(`Pelicula ${MovieName} calificada: ${rate}`)
-              : alert(`Pelicula ${MovieName} calificada: ${rate}`)
+              ? Alert.alert(`Pelicula ${MovieName} calificada: ${rate} `)
+              : alert(`Pelicula ${MovieName} calificada: ${rate} ${response}`)
           )
       );
     } catch {
@@ -67,7 +67,7 @@ export async function RateMovie(rate, MovieId, MovieName) {
 }
 
 export async function setFavoriteMovie(movie, favorite) {
- return GetSavedKey("MySessionId").then(async (sessionID) => {
+  return GetSavedKey("MySessionId").then(async (sessionID) => {
     try {
       return await fetch(
         `${BaseUrl}account?api_key=${APIKey}&session_id=${sessionID}`
@@ -87,15 +87,34 @@ export async function setFavoriteMovie(movie, favorite) {
               }),
             }
           ).then((response) =>
-            response.json().then((action) =>
-            Platform.OS !== "web"
-              ? Alert.alert("Hecho",`Pelicula ${movie.title} ${(action.status_code===1|action.status_code===12)? "añadida a":"removida de"} favoritos`)
-              : alert(`Pelicula ${movie.title} ${(action.status_code===1|action.status_code===12)? "añadida a":"removida de"} favoritos`)).then(()=>FetchFavoriteMoviesData().then(favorites=>favorites))
+            response
+              .json()
+              .then((action) =>
+                Platform.OS !== "web"
+                  ? Alert.alert(
+                      "Hecho",
+                      `Pelicula ${movie.title} ${
+                        (action.status_code === 1) | (action.status_code === 12)
+                          ? "añadida a"
+                          : "removida de"
+                      } favoritos`
+                    )
+                  : alert(
+                      `Pelicula ${movie.title} ${
+                        (action.status_code === 1) | (action.status_code === 12)
+                          ? "añadida a"
+                          : "removida de"
+                      } favoritos`
+                    )
+              )
+              .then(() =>
+                FetchFavoriteMoviesData().then((favorites) => favorites)
+              )
           );
         })
       );
     } catch {
-       console.log("error marking movie as favorite");
+      console.log("error marking movie as favorite");
     }
   });
 }
@@ -136,22 +155,25 @@ export async function FetchMoviesData() {
 }
 
 export async function FetchFavoriteMoviesData() {
- return GetSavedKey("MySessionId").then(async (sessionID) => {
+  return GetSavedKey("MySessionId").then(async (sessionID) => {
     try {
       return await fetch(
         `${BaseUrl}account?api_key=${APIKey}&session_id=${sessionID}`
       ).then((accountDetails) =>
         accountDetails.json().then(async (account) => {
-    return await fetch(
-      `${BaseUrl}/account/${account.id}/favorite/movies?api_key=${APIKey}&session_id=${sessionID}&language=${Language}&page=1`
-    ).then((response) =>
-      response
-        .json()
-        .then((fetchedmovies) => organizeAlphabetically(fetchedmovies)))}))}
-
-   catch {
-    return "error showing favorites"
-  }})
+          return await fetch(
+            `${BaseUrl}/account/${account.id}/favorite/movies?api_key=${APIKey}&session_id=${sessionID}&language=${Language}&page=1`
+          ).then((response) =>
+            response
+              .json()
+              .then((fetchedmovies) => organizeAlphabetically(fetchedmovies))
+          );
+        })
+      );
+    } catch {
+      return "error showing favorites";
+    }
+  });
 }
 
 export async function FetchMovie(movieId) {

@@ -48,7 +48,12 @@ const HomeScreen = () => {
                 movies !== undefined ? (
                   movies.map((movie) =>
                     movie.backdrop_path !== null ? (
-                      <Cards favoritesRef={setfavorites} isFavorite={false} key={movie.id} Movie={movie} />
+                      <Cards
+                        favoritesRef={setfavorites}
+                        isFavorite={false}
+                        key={movie.id}
+                        Movie={movie}
+                      />
                     ) : null
                   )
                 ) : (
@@ -65,7 +70,12 @@ const HomeScreen = () => {
                 favorites !== undefined ? (
                   favorites.map((movie) =>
                     movie.backdrop_path !== null ? (
-                      <Cards  favoritesRef={setfavorites} isFavorite={true} key={movie.id} Movie={movie} />
+                      <Cards
+                        favoritesRef={setfavorites}
+                        isFavorite={true}
+                        key={movie.id}
+                        Movie={movie}
+                      />
                     ) : null
                   )
                 ) : (
