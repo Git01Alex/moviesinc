@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import {
+  ImageBackground,
+  Platform,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Image,
+} from "react-native";
 import HomeScreen from "./components/homeScreen";
 import { CheckCredentials, GetSavedKey } from "./API/Auth";
 import { WebView } from "react-native-webview";
-
+import Header from "./components/header";
 import { Sessionrequest } from "./API/TheMovieDB";
+import Login from "./components/login";
 
 export default function App() {
   const [registered, setregistered] = useState(false);
@@ -20,25 +29,7 @@ export default function App() {
     });
   }, []);
 
-  return registered && registered ? (
-    <HomeScreen />
-  ) : (
-    <WebView
-      onNavigationStateChange={(navigationDetails) => {
-        navigationDetails.url.includes("/allow")
-          ? Sessionrequest()
-            ? setregistered(true)
-            : console.log("error on registration page")
-          : null;
-      }}
-      source={{
-        uri: `https://www.themoviedb.org/authenticate/${temporalToken}`,
-      }}
-      style={{ height: "80%", width: "100%", marginTop: 45 }}
-    />
-  );
+  return registered && registered ? <HomeScreen /> : <Login TemporalToken={temporalToken} setUserRegistered={setregistered}/>;
 }
 
-const styles = StyleSheet.create({
-  container: {},
-});
+const styles = StyleSheet.create({});

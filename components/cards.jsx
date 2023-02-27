@@ -42,6 +42,8 @@ const Cards = (props) => {
             Movie={props.Movie}
             Visible={moreInfo}
             HandleVisible={showMoreInfo}
+            SetFavorites={props.favoritesRef}
+            Favorite={props.isFavorite}
           />
         </Suspense>
       ) : null}

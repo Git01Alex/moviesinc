@@ -67,7 +67,7 @@ export async function RateMovie(rate, MovieId, MovieName) {
 }
 
 export async function setFavoriteMovie(movie, favorite) {
-  GetSavedKey("MySessionId").then(async (sessionID) => {
+ return GetSavedKey("MySessionId").then(async (sessionID) => {
     try {
       return await fetch(
         `${BaseUrl}account?api_key=${APIKey}&session_id=${sessionID}`
@@ -90,7 +90,7 @@ export async function setFavoriteMovie(movie, favorite) {
             response.json().then((action) =>
             Platform.OS !== "web"
               ? Alert.alert("Hecho",`Pelicula ${movie.title} ${(action.status_code===1|action.status_code===12)? "añadida a":"removida de"} favoritos`)
-              : alert(`Pelicula ${MovieName} calificada: ${rate}`))
+              : alert(`Pelicula ${movie.title} ${(action.status_code===1|action.status_code===12)? "añadida a":"removida de"} favoritos`)).then(()=>FetchFavoriteMoviesData().then(favorites=>favorites))
           );
         })
       );

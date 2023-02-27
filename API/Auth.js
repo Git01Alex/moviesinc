@@ -6,7 +6,7 @@ export const getCredentials = async () => {
   try {
    return await fetch(`${BaseUrl}/authentication/token/new?api_key=${APIKey}`).then(
       (response) =>
-        response.json().then(async (token) => { console.log(token.request_token);
+        response.json().then(async (token) => {
         return  await SaveToStore("TemporalAccessToken", token.request_token).then(()=>false)
         })
     );

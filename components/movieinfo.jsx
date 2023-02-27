@@ -9,7 +9,6 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import * as SecureStorage from "expo-secure-store";
 import {
   imageBaseUrl,
   getGenres,
@@ -20,25 +19,25 @@ import {
 } from "../API/TheMovieDB";
 import Rating from "./rating";
 import Cards from "./cards";
-import StarRating from "react-native-star-rating-widget";
 const HorizontalScroller = lazy(() => import("./horizontalScroller"));
 
 const Movieinfo = (props) => {
-  const [screenSize, setScreenSize] = useState(Dimensions.get("screen"));
+  const [screenSize, setScreenSize] = useState(Dimensions.get("screen").width);
   const [movie, setMovie] = useState([]);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [cast, setCast] = useState([]);
   const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
-    const screenChange = Dimensions.addEventListener("change", ({ screen }) => {
-      setScreenSize({ screen });
+    const screenChange = Dimensions.addEventListener("change", () => {
+      setScreenSize(Dimensions.get("screen").width);
     });
     let ignore = false;
     if (!ignore) {
       FetchCast(props.Movie.id).then((result) => setCast(result));
       FetchMovie(props.Movie.id).then((result) => setMovie(result));
       GetSimilarMovies(props.Movie.id).then((value) => setSimilarMovies(value));
+      setFavorite(props.Favorite)
     }
     return () => {
       screenChange?.remove();
@@ -51,7 +50,7 @@ const Movieinfo = (props) => {
         <View
           style={{
             backgroundColor: "black",
-            width: screenSize.width < 700 ? "100%" : "60%",
+            width: screenSize < 700 ? "100%" : "60%",
             height: "80%",
             borderRadius: 15,
           }}
@@ -91,7 +90,7 @@ const Movieinfo = (props) => {
                   <TouchableOpacity
                       onPress={async() => {
                         setFavorite(!favorite);
-                        await setFavoriteMovie(movie, !favorite)
+                        await setFavoriteMovie(movie, !favorite).then(favorites=>props.SetFavorites(favorites))
                       }}
                       style={{
                         borderRadius: 40,
@@ -149,7 +148,7 @@ const Movieinfo = (props) => {
                       <HorizontalScroller
                         content={similarMovies.map((movie) =>
                           movie.backdrop_path !== null ? (
-                            <Cards key={movie.id} Movie={movie} />
+                            <Cards  favoritesRef={ props.SetFavorites} isFavorite={false}  key={movie.id} Movie={movie} />
                           ) : null
                         )}
                       />
