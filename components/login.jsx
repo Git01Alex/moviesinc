@@ -13,7 +13,6 @@ import { Sessionrequest } from "../API/TheMovieDB";
 import { GetSavedKey } from "../API/Auth";
 
 const Login = (props) => {
-  useEffect(() => {}, []);
 
   const handleLogin = () => {
     Platform.OS !== "web" ? (
@@ -42,13 +41,13 @@ const Login = (props) => {
     document.onvisibilitychange = function () {
       document.visibilityState === "visible"
         ? Sessionrequest(props.TemporalToken).then(() =>
-            GetSavedKey("MySessionId").then((session) =>
-              session !== undefined
+            GetSavedKey("MySessionId").then((session) =>{
+              session !== "undefined"
                 ? props.setUserRegistered(true)
                 : alert(
                     "Al parecer hubo un error al registrar sus credenciales, intente de nuevo."
                   )
-            )
+                })
           )
         : null;
     };

@@ -9,7 +9,7 @@ export const FetchMoviesGenres = async () => {
   try {
     return await fetch(
       `${BaseUrl}genre/movie/list?api_key=${APIKey}&language=${Language}`
-    ).then((response) => response.json().then((genres) => genres));
+    ).then((response) => response.json().then(genres => genres));
   } catch {
     return [];
   }
@@ -57,7 +57,7 @@ export async function RateMovie(rate, MovieId, MovieName) {
           .then(() =>
             Platform.OS !== "web"
               ? Alert.alert(`Pelicula ${MovieName} calificada: ${rate} `)
-              : alert(`Pelicula ${MovieName} calificada: ${rate} ${response}`)
+              : alert(`Pelicula ${MovieName} calificada: ${rate}`)
           )
       );
     } catch {

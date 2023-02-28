@@ -5,9 +5,9 @@ import { BaseUrl, APIKey } from "./TheMovieDB";
 export const getCredentials = async () => {
   try {
    return await fetch(`${BaseUrl}/authentication/token/new?api_key=${APIKey}`).then(
-      (response) =>
+      response =>
         response.json().then(async (token) => {
-        return  await SaveToStore("TemporalAccessToken", token.request_token).then(()=>false)
+        return await SaveToStore("TemporalAccessToken", token.request_token).then(()=>false)
         })
     );
   } catch {
@@ -22,13 +22,13 @@ export const SaveToStore = async (key, token) =>
 
 export async function GetSavedKey(key) {
   return (await Platform.OS) !== "web"
-    ? await SecureStorage.getItemAsync(key).then((token) => token)
+    ? await SecureStorage.getItemAsync(key).then((value) => value)
     : localStorage.getItem(key);
 }
 export async function CheckCredentials() {
   try {
-    return await GetSavedKey("MySessionId").then((token) => { 
-      return (token === undefined) | (token === null) ? getCredentials().then(isUserRegister=>isUserRegister) : true;
+    return await GetSavedKey("MySessionId").then((value) => {
+       return(value === 'undefined') ? getCredentials().then(isUserRegister=>isUserRegister) : true;
     });
   } catch {
     (err) => console.log(err);

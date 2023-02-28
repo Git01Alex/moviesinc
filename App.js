@@ -25,9 +25,9 @@ export default function App() {
         ? setregistered(userRegistered)
         : await GetSavedKey("TemporalAccessToken")
             .then((token) => settemporalToken(token))
-            .finally(() => false);
+            .then(() =>  setregistered(false));
     });
-  }, []);
+  }, [registered]);
 
   return registered && registered ? <HomeScreen /> : <Login TemporalToken={temporalToken} setUserRegistered={setregistered}/>;
 }
